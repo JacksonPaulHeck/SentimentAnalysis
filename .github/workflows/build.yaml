@@ -58,6 +58,11 @@ jobs:
         shell: bash
         run: ./$EXE_NAME $INPUT_FILES $OUTPUT_FILES
 
+      - name: Run Catch tests
+        working-directory: ${{runner.workspace}}/build
+        shell: bash
+        run: ./$EXE_NAME
+
       - name: Copy output files to artifact directory
         working-directory: ${{runner.workspace}}/build
         run: |
@@ -67,7 +72,7 @@ jobs:
             echo "  Copying $f"
             cp $f artifacts/
           done
-        
+
       - name: Upload output files to GitHub so they can be reviewed
         uses: actions/upload-artifact@v1
         with:

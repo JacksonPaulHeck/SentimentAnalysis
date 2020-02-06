@@ -3,6 +3,7 @@
 build/
 cmake-build-debug/
 .idea/
+*.csv
 
 # Compiled Object files
 *.slo

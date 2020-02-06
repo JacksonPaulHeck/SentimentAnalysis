@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.14)
 project(S20-PA01-SentimentAnalysis)
 set (EXE_NAME SentimentAnalyzer)
 
+
+
 ##########################################
 # Students, edit the items below.  In the quotes,
 # put the names of the input files as they should appear
@@ -11,10 +13,10 @@ set (EXE_NAME SentimentAnalyzer)
 #   set (input02 "train_target.csv")
 # etc....
 
-set (input01 "")
-set (input02 "")
-set (input03 "")
-set (input04 "")
+set (input01 "Test.csv")
+#set (input02 "dev-test-target.csv")
+#set (input03 "dev-train-data.csv")
+#set (input04 "dev-train-target.csv")
 
 #
 ##########################################
@@ -25,4 +27,4 @@ foreach(file IN LISTS input01 input02 input03 input04)
 endforeach()
 
 set(CMAKE_CXX_STANDARD 17)
-add_executable(${EXE_NAME} main.cpp)
+add_executable(${EXE_NAME} main.cpp JPString.cpp TargetDTO.cpp DataDTO.cpp tests.cpp)
