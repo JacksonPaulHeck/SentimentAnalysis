@@ -94,7 +94,7 @@ void analyzeData(DataDTO *dataDto, ostream &os) {
 }
 
 int main() {
-    ifstream iss("dev-test-data.csv");
+    ifstream iss("Test.csv");
     ofstream oss("output.txt");
     char *line = new char[1024];
     vector<DataDTO *> *dataVector = new vector<DataDTO *>;
