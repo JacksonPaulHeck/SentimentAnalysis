@@ -19,7 +19,6 @@ JPString :: JPString(char * input) {
 }
 JPString :: JPString(const JPString &) {}
 JPString :: ~JPString() {
-    cout << "JPString Destructor" << endl;
     delete[] data;
 }
 JPString& JPString :: operator=(const JPString & jpString) {
