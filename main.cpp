@@ -17,23 +17,19 @@ using namespace std;
 
 JPString stopWordOmit(JPString* line) {
     ofstream stopWordFile("StopWordList.txt");
-    char* temp;
-    int i = 0;
     //while(line)
     stopWordFile.close();
     return *line;
 }
 
 vector<DataDTO *> parseTestData(istream &iss, char *line, vector<DataDTO *> *dataVector) {
-    int rowNum;
-    long id;
+    int rowNum = 0;
+    long id = 0;
     char *username = new char[1024];
     char *data = new char[1024];
-    int pos;
-    int i;
-    JPString *JPusername;
-    JPString *JPdata;
-    DataDTO *dataDto;
+    JPString *JPusername = nullptr;
+    JPString *JPdata = nullptr;
+    DataDTO *dataDto = nullptr;
     while (!iss.eof()) {
         dataDto = new DataDTO();
         for (int pos = 0; pos < 3; pos++) {
@@ -95,7 +91,7 @@ void analyzeData(DataDTO *dataDto, ostream &os) {
 
 int main(int argc, char** argv) {
     ifstream iss(argv[1]);
-    ofstream oss("output.txt");
+    ofstream oss(argv[2]);
     char *line = new char[1024];
     vector<DataDTO *> *dataVector = new vector<DataDTO *>;
 
