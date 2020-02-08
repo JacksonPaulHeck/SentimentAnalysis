@@ -3,6 +3,7 @@
 //
 
 #include "DataDTO.h"
+#include "TargetDTO.h"
 
 DataDTO :: DataDTO(){
     this->rowNum = 0;
@@ -48,4 +49,7 @@ bool DataDTO :: setData(JPString* Data){
 }
 JPString* DataDTO :: getData(){
     return this->data;
+}
+TargetDTO DataDTO :: getTarget(){
+
 }

@@ -7,6 +7,7 @@
 
 
 #include "JPString.h"
+#include "TargetDTO.h"
 
 class DataDTO {
 private:
@@ -26,6 +27,8 @@ public:
     JPString* getUsername();
     bool setData(JPString*);
     JPString* getData();
+
+    TargetDTO getTarget();
 };
 
 

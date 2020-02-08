@@ -12,16 +12,16 @@ class TargetDTO {
 private:
     int rowNum;
     int target;
-    JPString* id;
+    long id;
 public:
     TargetDTO();
-    TargetDTO(int, int, JPString*);
+    TargetDTO(int, int, long);
     bool setRowNum(int);
     int getRowNum();
     bool setTarget(int);
     int getTarget();
-    bool setId(JPString*);
-    JPString* getId();
+    bool setId(long);
+    long getId();
 };
 
 

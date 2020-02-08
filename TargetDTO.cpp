@@ -6,9 +6,9 @@
 TargetDTO :: TargetDTO(){
     this->rowNum = 0;
     this->target = 0;
-    this->id = new JPString();
+    this->id = 0;
 }
-TargetDTO :: TargetDTO(int RowNum, int Target, JPString* ID){
+TargetDTO :: TargetDTO(int RowNum, int Target, long ID){
     this->rowNum = RowNum;
     this->target = Target;
     this->id = ID;
@@ -27,10 +27,10 @@ bool TargetDTO :: setTarget(int Target){
 int TargetDTO :: getTarget(){
     return this->target;
 }
-bool TargetDTO :: setId(JPString* ID){
+bool TargetDTO :: setId(long ID){
     this->id = ID;
     return true;
 }
-JPString* TargetDTO :: getId(){
+long TargetDTO :: getId(){
     return this->id;
 }
