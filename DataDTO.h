@@ -27,8 +27,6 @@ public:
     JPString* getUsername();
     bool setData(JPString*);
     JPString* getData();
-
-    TargetDTO getTarget();
 };
 
 

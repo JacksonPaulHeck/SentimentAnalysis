@@ -50,6 +50,3 @@ bool DataDTO :: setData(JPString* Data){
 JPString* DataDTO :: getData(){
     return this->data;
 }
-TargetDTO DataDTO :: getTarget(){
-
-}

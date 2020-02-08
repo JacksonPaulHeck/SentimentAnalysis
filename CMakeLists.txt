@@ -13,9 +13,9 @@ set (EXE_NAME SentimentAnalyzer)
 #   set (input02 "train_target.csv")
 # etc....
 
-set (input01 "Test.csv")
+set (input01 "dev-train-data-sm.csv")
 set (input02 "StopWordList.csv")
-#set (input04 "dev-train-target.csv")
+set (input04 "dev-train-target-sm.csv")
 
 #
 ##########################################

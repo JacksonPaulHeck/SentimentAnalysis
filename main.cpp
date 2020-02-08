@@ -18,7 +18,7 @@ vector<DataDTO *> *parseTestData(istream &, char *, vector<DataDTO *> *);
 
 void stopWordOmit(JPString &);
 
-void analyzeData(vector<DataDTO *>*, ostream &, istream &);
+void analyzeData(vector<DataDTO *> *, ostream &, istream &);
 
 using namespace std;
 
@@ -26,9 +26,13 @@ int main(int argc, char **argv) {
     //ifstream iss(argv[1]);
     //ofstream oss(argv[2]);
 
-    ifstream iss("dev-train-data.csv");
+    ifstream iss("dev-train-data-sm.csv");
     ofstream oss("output.txt");
-    ifstream targetis("dev-train-target.csv");
+    ifstream targetis("dev-train-target-sm.csv");
+
+    /*ifstream iss("Test.csv");
+    ofstream oss("output.txt");
+    ifstream targetis("Target.csv");*/
     if (iss.is_open()) {
         cout << "iss opened" << endl;
     } else {
@@ -61,7 +65,7 @@ vector<DataDTO *> *parseTestData(istream &iss, char *line, vector<DataDTO *> *da
     char *username = new char[1024];
     char *data = new char[1024];
     JPString *JPusername = nullptr;
-    JPString *JPdata = new JPString("");
+    JPString *JPdata = new JPString();
     DataDTO *dataDto = nullptr;
     ifstream istream("StopWordList.csv");
     char *temp = new char[20];
@@ -91,11 +95,11 @@ vector<DataDTO *> *parseTestData(istream &iss, char *line, vector<DataDTO *> *da
             data[r] = tolower(data[r]);
             r++;
         }
-        char *token = strtok(data, " \"ï¿½.;,`@#$%^&*()_-!?\r");
+        char *token = strtok(data, "  :\t\t´И\u0012'\"£©\u009F¼¬ï¿½.;,`@#$%^&*()_-!?\r/1234567890");
         while (token != NULL) {
             JPString JPToken(token);
             jpStringVec.push_back(JPToken);
-            token = strtok(NULL, " \"ï¿½.;,`@#$%^&*()_-!?\r");
+            token = strtok(NULL, "  :\t\t´И\u0012'\"£©\u009F¼¬ï¿½.;,`@#$%^&*()_-!?\r/1234567890");
         }
         int k = 0;
         istream.getline(temp, 20);
@@ -141,7 +145,7 @@ void printTestData(vector<DataDTO *> dataVector) {
     }
 }
 
-void analyzeData(vector<DataDTO *>* dataVector, ostream &os, istream &is) {
+void analyzeData(vector<DataDTO *> *dataVector, ostream &os, istream &is) {
     dataVector->pop_back();
     map<JPString, int> wordList;
     map<JPString, int>::iterator iteratorWordList;
@@ -168,19 +172,23 @@ void analyzeData(vector<DataDTO *>* dataVector, ostream &os, istream &is) {
         targetVector.push_back(*targetDto);
     }
     int i = 0;
-    while(i < dataVector->size()){
+    while (i < dataVector->size()) {
         int j = 0;
         JPString data = *dataVector->at(i)->getData();
         JPString str;
-        while(data[j] != '\0'){
-            if(data[j] != ' '){
+        int add;
+        while (data[j] != '\0') {
+            if (targetVector.at(i).getTarget() > 0) {
+                add = 1;
+            } else { add = -1; }
+            if (data[j] != ' ') {
                 str += data[j];
-            }else{
+            } else {
                 iteratorWordList = wordList.find(str);
-                if(iteratorWordList != wordList.end()){
-                    wordList[str] = iteratorWordList->second + targetVector.at(i).getTarget()/4;
-                }else if(iteratorWordList == wordList.end()){
-                    wordList[str] = targetVector.at(i).getTarget()/4;
+                if (iteratorWordList != wordList.end()) {
+                    wordList[str] = iteratorWordList->second + add;
+                } else if (iteratorWordList == wordList.end()) {
+                    wordList[str] = add;
                 }
                 str = "";
             }
@@ -189,7 +197,7 @@ void analyzeData(vector<DataDTO *>* dataVector, ostream &os, istream &is) {
         i++;
     }
     iteratorWordList = wordList.begin();
-    while(iteratorWordList != wordList.end()){
+    while (iteratorWordList != wordList.end()) {
         os << iteratorWordList->first << " : " << iteratorWordList->second << endl;
         iteratorWordList++;
     }
