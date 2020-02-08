@@ -18,7 +18,7 @@ vector<DataDTO *> *parseTestData(istream &, char *, vector<DataDTO *> *);
 
 void stopWordOmit(JPString &);
 
-void analyzeData(DataDTO *, ostream &, istream &);
+void analyzeData(vector<DataDTO *>*, ostream &, istream &);
 
 using namespace std;
 
@@ -26,9 +26,9 @@ int main(int argc, char **argv) {
     //ifstream iss(argv[1]);
     //ofstream oss(argv[2]);
 
-    ifstream iss("Test.csv");
+    ifstream iss("dev-train-data.csv");
     ofstream oss("output.txt");
-    ifstream targetis("Target.csv");
+    ifstream targetis("dev-train-target.csv");
     if (iss.is_open()) {
         cout << "iss opened" << endl;
     } else {
@@ -42,9 +42,8 @@ int main(int argc, char **argv) {
 
     cout << dataVector->size() << endl;
 
-    for(int j = 0; j < dataVector->size(); j++){
-        analyzeData(dataVector->at(j), oss, targetis);
-    }
+    analyzeData(dataVector, oss, targetis);
+
     for (int i = 0; i < dataVector->size(); i++) {
         delete[] dataVector->at(i);
     }
@@ -66,7 +65,7 @@ vector<DataDTO *> *parseTestData(istream &iss, char *line, vector<DataDTO *> *da
     DataDTO *dataDto = nullptr;
     ifstream istream("StopWordList.csv");
     char *temp = new char[20];
-    vector<JPString> charVec;
+    vector<JPString> jpStringVec;
     vector<JPString> stopWordVector;
     while (!iss.eof()) {
         dataDto = new DataDTO();
@@ -88,14 +87,14 @@ vector<DataDTO *> *parseTestData(istream &iss, char *line, vector<DataDTO *> *da
         iss.get(line, 1024, '\n');
         strncpy(data, line, 1024);
         int r = 0;
-        while(data[r] != '\0'){
+        while (data[r] != '\0') {
             data[r] = tolower(data[r]);
             r++;
         }
         char *token = strtok(data, " \"ï¿½.;,`@#$%^&*()_-!?\r");
         while (token != NULL) {
             JPString JPToken(token);
-            charVec.push_back(JPToken);
+            jpStringVec.push_back(JPToken);
             token = strtok(NULL, " \"ï¿½.;,`@#$%^&*()_-!?\r");
         }
         int k = 0;
@@ -106,21 +105,21 @@ vector<DataDTO *> *parseTestData(istream &iss, char *line, vector<DataDTO *> *da
             istream.getline(temp, 20);
             k++;
         }
-        for (int i = 0; i < charVec.size(); i++) {
+        for (int i = 0; i < jpStringVec.size(); i++) {
             int j = 0;
             bool isEqual = false;
             while (j < stopWordVector.size()) {
-                if (charVec.at(i) == stopWordVector.at(j)) {
+                if (jpStringVec.at(i) == stopWordVector.at(j)) {
                     isEqual = true;
                 }
                 j++;
             }
-            if (!isEqual && charVec.at(i).size() > 2) {
-                *JPdata += charVec.at(i);
+            if (!isEqual && jpStringVec.at(i).size() > 2) {
+                *JPdata += jpStringVec.at(i);
                 *JPdata += " ";
             }
         }
-        charVec.clear();
+        jpStringVec.clear();
         istream.close();
 
         dataDto->setData(JPdata);
@@ -142,21 +141,56 @@ void printTestData(vector<DataDTO *> dataVector) {
     }
 }
 
-void analyzeData(DataDTO *dataDto, ostream &os, istream & is) {
+void analyzeData(vector<DataDTO *>* dataVector, ostream &os, istream &is) {
+    dataVector->pop_back();
+    map<JPString, int> wordList;
+    map<JPString, int>::iterator iteratorWordList;
+
+    char *targetLine = new char[1024];
+    vector<TargetDTO> targetVector;
+    TargetDTO *targetDto = nullptr;
+    while (!is.eof()) {
+        targetDto = new TargetDTO();
+        for (int pos = 0; pos < 2; pos++) {
+            is.getline(targetLine, 1024, ',');
+            switch (pos % 2) {
+                case 0:
+                    targetDto->setRowNum(atoi(targetLine));
+                    break;
+                case 1:
+                    targetDto->setTarget(atoi(targetLine));
+                    break;
+                case 2:
+                    targetDto->setId(atol(targetLine));
+                    break;
+            }
+        }
+        targetVector.push_back(*targetDto);
+    }
     int i = 0;
-    JPString data;
-    data = *dataDto->getData();
-    while (i < data.size()) {
-        os << data[i];
+    while(i < dataVector->size()){
+        int j = 0;
+        JPString data = *dataVector->at(i)->getData();
+        JPString str;
+        while(data[j] != '\0'){
+            if(data[j] != ' '){
+                str += data[j];
+            }else{
+                iteratorWordList = wordList.find(str);
+                if(iteratorWordList != wordList.end()){
+                    wordList[str] = iteratorWordList->second + targetVector.at(i).getTarget()/4;
+                }else if(iteratorWordList == wordList.end()){
+                    wordList[str] = targetVector.at(i).getTarget()/4;
+                }
+                str = "";
+            }
+            j++;
+        }
         i++;
     }
-    os << endl;
-
-    map<JPString, int> wordList;
-
-    char* target = new char[1024];
-    while(!is.eof()) {
-        is.get(target, 1024, '\n');
-        os << target << endl;
+    iteratorWordList = wordList.begin();
+    while(iteratorWordList != wordList.end()){
+        os << iteratorWordList->first << " : " << iteratorWordList->second << endl;
+        iteratorWordList++;
     }
 }
