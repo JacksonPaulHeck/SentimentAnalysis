@@ -8,7 +8,7 @@ env:
   ###   List them in the order that they need to appear in Argv param of main.
   ###   Output Files will follow input files
   ###   Note: These should be the actual names of the files.  No double quotes
-  INPUT_FILES: Test.csv StopWordList.csv Target.csv dev-train-data-sm.csv dev-train-target-sm.csv
+  INPUT_FILES: dev-train-data-sm.csv dev-train-target-sm.csv dev-test-target.csv dev-test-data.csv StopWordList.csv
   OUTPUT_FILES: output.txt
 
 jobs:
