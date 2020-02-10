@@ -2,7 +2,6 @@
 // Created by jacks on 1/26/2020.
 //
 #include <iostream>
-#include <cstring>
 #include "JPString.h"
 
 using namespace std;
@@ -74,8 +73,8 @@ JPString &JPString::operator=(const char *Data) {
     }
     length = i;
     data = new char[length];
-    for (int i = 0; i < length; i++) {
-        data[i] = Data[i];
+    for (int j = 0; j < length; j++) {
+        data[j] = Data[j];
     }
     return *this;
 }

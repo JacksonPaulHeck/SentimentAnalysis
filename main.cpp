@@ -1,6 +1,5 @@
 #include <iostream>
 #include <fstream>
-#include <sstream>
 #include <vector>
 #include <cstring>
 #include "JPString.h"
@@ -9,10 +8,7 @@
 #include <map>
 
 //#define CATCH_CONFIG_RUNNER
-
 //#include "catch.hpp"
-
-void printTestData(vector<DataDTO *>);
 void parseTestData(istream &, char *, vector<DataDTO *> &);
 void trainData(vector<DataDTO *> &, ostream &, istream &, map<JPString, int> &, vector<TargetDTO *> &);
 void analyzeData(vector<DataDTO *> &, ofstream &, ifstream &, map<JPString, int> &, vector<TargetDTO *> &);
@@ -24,7 +20,7 @@ int main(int argc, char **argv) {
     ofstream testOut("output.txt");
     ofstream dataOut("output2.txt");
     ifstream trainingIn("Test.csv");
-    ifstream targetis("Target.csv");
+    ifstream targetIn("Target.csv");
     char *line = new char[1024];
     vector<DataDTO *> trainingVector;
     vector<DataDTO *> dataVector;
@@ -33,7 +29,7 @@ int main(int argc, char **argv) {
     vector<TargetDTO *> actualTarget;
 
     parseTestData(trainingIn, line, trainingVector);
-    trainData(trainingVector, testOut, targetis, wordList, actualTarget);
+    trainData(trainingVector, testOut, targetIn, wordList, actualTarget);
 
     trainingIn.clear();
     trainingIn.seekg(0, ios::beg);
@@ -45,7 +41,7 @@ int main(int argc, char **argv) {
 
     trainingIn.close();
     testOut.close();
-    targetis.close();
+    targetIn.close();
     dataOut.close();
     cout << "end of program" << endl;
 
@@ -109,7 +105,7 @@ void analyzeData(vector<DataDTO *> &dataVector, ofstream &oss, ifstream &iss, ma
         } else {
             result = rand() % 2 * 4;
         }
-        TargetDTO *targetDto = new TargetDTO(dataVector.at(i)->getRowNum(), result, dataVector.at(i)->getId());
+        auto *targetDto = new TargetDTO(dataVector.at(i)->getRowNum(), result, dataVector.at(i)->getId());
         targetVector.push_back(targetDto);
         i++;
     }
@@ -120,8 +116,8 @@ void parseTestData(istream &iss, char *line, vector<DataDTO *> &dataVector) {
     long id = 0;
     char *username = new char[1024];
     char *data = new char[1024];
-    JPString *JPusername = nullptr;
-    JPString *JPdata = new JPString();
+    JPString *JPUsername = nullptr;
+    auto JPData = new JPString();
     DataDTO *dataDto = nullptr;
     ifstream istream("StopWordList.csv");
     char *temp = new char[20];
@@ -140,7 +136,7 @@ void parseTestData(istream &iss, char *line, vector<DataDTO *> &dataVector) {
                     break;
                 case 2:
                     strncpy(username, line, 1024);
-                    JPusername = new JPString(username);
+                    JPUsername = new JPString(username);
                     break;
             }
         }
@@ -175,19 +171,19 @@ void parseTestData(istream &iss, char *line, vector<DataDTO *> &dataVector) {
                 j++;
             }
             if (!isEqual && jpStringVec.at(i).size() > 2) {
-                *JPdata += jpStringVec.at(i);
-                *JPdata += " ";
+                *JPData += jpStringVec.at(i);
+                *JPData += " ";
             }
         }
         jpStringVec.clear();
         istream.close();
 
-        dataDto->setData(JPdata);
-        dataDto->setUsername(JPusername);
+        dataDto->setData(JPData);
+        dataDto->setUsername(JPUsername);
         dataDto->setId(id);
         dataDto->setRowNum(rowNum);
         dataVector.push_back(dataDto);
-        JPdata = new JPString();
+        JPData = new JPString();
     }
     delete[] data;
     delete[] username;
