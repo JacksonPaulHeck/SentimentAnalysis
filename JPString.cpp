@@ -5,16 +5,19 @@
 #include "JPString.h"
 
 using namespace std;
+
 //Empty Constructor
 JPString::JPString() {
     length = 0;
-    data = new char[1];
+    data = new char[0];
 }
+
 //Constructor with char as param
 JPString::JPString(char input) {
     length = 1;
     data = new char(input);
 }
+
 //Constructor with char* as param
 JPString::JPString(const char *input) {
     if (input) {
@@ -32,6 +35,7 @@ JPString::JPString(const char *input) {
         data = new char[0];
     }
 }
+
 //Constructor with JPString as param i.e. copyConstructor
 JPString::JPString(const JPString &jpString) {
     length = jpString.size();
@@ -40,14 +44,17 @@ JPString::JPString(const JPString &jpString) {
         data[i] = jpString[i];
     }
 }
+
 //Destructor
 JPString::~JPString() {
-        delete data;
+    delete data;
 }
+
 //Returns the size of the JPString
 int JPString::size() const {
     return length;
 }
+
 //Assignment Operator
 JPString &JPString::operator=(const JPString &jpString) {
     if (this == &jpString) {
@@ -61,6 +68,7 @@ JPString &JPString::operator=(const JPString &jpString) {
     }
     return *this;
 }
+
 JPString &JPString::operator=(const char *Data) {
     if (this->data == Data) {
         return *this;
@@ -90,6 +98,7 @@ bool operator==(const JPString &jpString, const JPString &jpString1) {
     }
     return i == len;
 }
+
 bool operator==(const JPString &jpString, const char *jpString1) {
     return jpString == JPString(jpString1);
 }
@@ -133,16 +142,14 @@ ostream &operator<<(ostream &outStream, const JPString &jpString) {
 }
 
 //Greater than Comparator
-bool operator > (const JPString& jpString, const JPString& jpString1)
-{
+bool operator>(const JPString &jpString, const JPString &jpString1) {
     int cap = (JPString().size() < jpString1.size()) ? jpString.size() : jpString1.size();
     int n = 0;
     while ((n < cap) && (jpString[n] == jpString1[n])) n++;
     if (n == cap) return (jpString.size() > jpString1.size());
 
-    if ( (('A'<=jpString[n]&&jpString[n]<='Z') || ('a'<=jpString[n]&&jpString[n]<='z')) &&
-         (('A'<=jpString1[n]&&jpString1[n]<='Z') || ('a'<=jpString1[n]&&jpString1[n]<='z')) )
-    {
+    if ((('A' <= jpString[n] && jpString[n] <= 'Z') || ('a' <= jpString[n] && jpString[n] <= 'z')) &&
+        (('A' <= jpString1[n] && jpString1[n] <= 'Z') || ('a' <= jpString1[n] && jpString1[n] <= 'z'))) {
         char A = (jpString[n] & ~32);
         char B = (jpString1[n] & ~32);
         if (A != B) return (A > B);
@@ -160,6 +167,6 @@ istream &operator>>(istream &inStream, JPString &jpString) {
 }
 
 //Less than Comparator
-bool operator<(const JPString & jpString, const JPString & jpString1) {
+bool operator<(const JPString &jpString, const JPString &jpString1) {
     return !(jpString == jpString1) && !(jpString > jpString1);
 }
