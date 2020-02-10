@@ -8,8 +8,8 @@ env:
   ###   List them in the order that they need to appear in Argv param of main.
   ###   Output Files will follow input files
   ###   Note: These should be the actual names of the files.  No double quotes
-  INPUT_FILES: input01.txt input02.txt
-  OUTPUT_FILES: output01.txt
+  INPUT_FILES: dev-train-data-sm.csv dev-train-target-sm.csv TrainTarget.csv TraingData.csv StopWordList.csv
+  OUTPUT_FILES: output.txt
 
 jobs:
   build:
@@ -58,6 +58,11 @@ jobs:
         shell: bash
         run: ./$EXE_NAME $INPUT_FILES $OUTPUT_FILES
 
+      - name: Run Catch tests
+        working-directory: ${{runner.workspace}}/build
+        shell: bash
+        run: ./$EXE_NAME
+
       - name: Copy output files to artifact directory
         working-directory: ${{runner.workspace}}/build
         run: |
@@ -67,7 +72,7 @@ jobs:
             echo "  Copying $f"
             cp $f artifacts/
           done
-        
+
       - name: Upload output files to GitHub so they can be reviewed
         uses: actions/upload-artifact@v1
         with:
