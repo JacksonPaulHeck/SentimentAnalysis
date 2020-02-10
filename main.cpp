@@ -389,10 +389,8 @@ void analyzeData(istream& dataIn, map<JPString, int> &wordList, char *targetLine
         }
         totalTweets++;
         JPData = new JPString();
-        delete dataDto;
         dataDto = new DataDTO();
     }
-    delete dataDto;
 
     testOut << "Accuracy: ";
     testOut << correct / totalTweets << endl;
