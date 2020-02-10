@@ -7,10 +7,7 @@
 #include "DataDTO.h"
 #include <map>
 
-
-void parseData(istream &, char *, vector<DataDTO *> &);
-
-void analyzeData(vector<DataDTO *> &, map<JPString, int> &, char *, istream &, ostream&);
+void analyzeData(istream&, map<JPString, int> &, char *, istream &, ostream&, char*);
 
 void parseDataAndTrain(istream &, istream &, char *, map<JPString, int> &);
 
@@ -31,19 +28,18 @@ int main(int argc, char **argv) {
         cout << "Files Open" << endl;
     }
     cout << "Creating Variables..." << endl;
+    char * line2 = new char[2048];
     char *line = new char[2048]; //used for file input
     vector<DataDTO *> dataVector; //holds the Data from the Testing Data File
     map<JPString, int> wordList; //map for word frequency analysis
     cout << "Variables Created" << endl;
-
-    parseData(testDataIn, line, dataVector);
     cout << "Parsed Actual Data" << endl;
 
     parseDataAndTrain(trainDataIn, trainTargetIn, line, wordList);
 
     cout << "Parsed Data" << endl;
 
-    analyzeData(dataVector, wordList, line, testTargetIn, outFile);
+    analyzeData(testDataIn, wordList, line, testTargetIn, outFile, line2);
 
     cout << "Analyzed Data" << endl;
     trainDataIn.close();
@@ -229,88 +225,14 @@ void parseDataAndTrain(istream &trainingDataIn, istream &trainingTargetIn, char 
     delete[] temp;
 } //creates the map
 
-void analyzeData(vector<DataDTO *> &dataVector, map<JPString, int> &wordList, char *targetLine, istream &testTargetIn, ostream& testOut) {
+void analyzeData(istream& dataIn, map<JPString, int> &wordList, char *targetLine, istream &testTargetIn, ostream& testOut, char* line) {
     //Creates an iterator for the map
     map<JPString, int>::iterator iteratorWordList;
     vector<long> accuracyVector;
     int result = 0;
     int total = 0;
-    int correct = 0;
-    int totalTweets = 0;
-    //iterates through the vector of each DataDTO
-    while (totalTweets < dataVector.size()) {
-        int j = 0;
-        JPString data = *dataVector.at(totalTweets)->getData();
-        JPString str;
-        //itterates through each DataDTO's data for the endline character
-        while (data[j] != '\0') {
-            total = 0;
-            //delimites using a " "
-            if (data[j] != ' ') {
-                str += data[j];
-            }
-                //if full word, look for it in the map
-            else {
-                iteratorWordList = wordList.find(str);
-                //while itterating through the list, gets the total, either pos or neg
-                if (iteratorWordList != wordList.end() &&
-                    (iteratorWordList->second > 10 || iteratorWordList->second < -10)) {
-                    total += iteratorWordList->second;
-                } else {
-                    total += 0;
-                }
-                str = "";
-            }
-            j++;
-        }
-        //sets the result of the whole string to the sum of its parts
-        if (total < 0) {
-            result = 0;
-        } else if (total > 0) {
-            result = 4;
-        } else {
-            srand(3141592);
-            result = (rand() % 2) * 4;
-        }
-        //adds a new TargetDTO with the Guesses of sentiment to a vector
-        auto *targetDto = new TargetDTO(dataVector.at(totalTweets)->getRowNum(), result, dataVector.at(totalTweets)->getId());
-
-        testTargetIn.getline(targetLine, 12);
-        auto *actualTargetDto = new TargetDTO();
-        //delimits using a ","
-        for (int pos = 0; pos < 2; pos++) {
-            testTargetIn.getline(targetLine, 12, ',');
-            switch (pos) {
-                case 0:
-                    actualTargetDto->setRowNum(atoi(targetLine));
-                    break;
-                case 1:
-                    actualTargetDto->setTarget(atoi(targetLine));
-                    break;
-            }
-        }
-        testTargetIn.get(targetLine, 12, '\n');
-        actualTargetDto->setId(atol(targetLine));
-        if (targetDto->getTarget() == actualTargetDto->getTarget()) {
-            correct++;
-        } else {
-            accuracyVector.push_back(targetDto->getId());
-        }
-        totalTweets++;
-    }
-
-    testOut << "Accuracy: ";
-    testOut << correct / totalTweets << endl;
-    int index = 0;
-    //Iterates through the accuracyVector and outputs to a file the IDs of incorrectly analyzed tweets (Vector should be empty ;))
-    while (index < accuracyVector.size()) {
-        testOut << accuracyVector.at(index) << endl;
-        index++;
-    }
-}
-
-void parseData(istream &dataIn, char *line, vector<DataDTO *> &dataVector) {
-    //Declare Variables for parseData function
+    double correct = 0;
+    double totalTweets = 0;
     int rowNum = 0;
     long id = 0;
     char *username = new char[1024];
@@ -333,6 +255,9 @@ void parseData(istream &dataIn, char *line, vector<DataDTO *> &dataVector) {
         k++;
     }
     stopWordStream.close();
+
+
+
     //Loop to parse through data until end of file
 
     dataIn.clear();
@@ -399,9 +324,81 @@ void parseData(istream &dataIn, char *line, vector<DataDTO *> &dataVector) {
         dataDto->setId(id);
         dataDto->setRowNum(rowNum);
         //Add each DataDTO to a vector
-        dataVector.push_back(dataDto);
         //clear the string
+
+
+
+    //iterates through the vector of each DataDTO
+
+        int j = 0;
+        JPString dataFromDTO = *dataDto->getData();
+        JPString str;
+        //itterates through each DataDTO's data for the endline character
+        while (dataFromDTO[j] != '\0') {
+            total = 0;
+            //delimites using a " "
+            if (dataFromDTO[j] != ' ') {
+                str += dataFromDTO[j];
+            }
+                //if full word, look for it in the map
+            else {
+                iteratorWordList = wordList.find(str);
+                //while itterating through the list, gets the total, either pos or neg
+                if (iteratorWordList != wordList.end() &&
+                    (iteratorWordList->second > 10 || iteratorWordList->second < -10)) {
+                    total += iteratorWordList->second;
+                } else {
+                    total += 0;
+                }
+                str = "";
+            }
+            j++;
+        }
+        //sets the result of the whole string to the sum of its parts
+        if (total < 0) {
+            result = 0;
+        } else if (total > 0) {
+            result = 4;
+        } else {
+            srand(3141592);
+            result = (rand() % 2) * 4;
+        }
+        //adds a new TargetDTO with the Guesses of sentiment to a vector
+        auto *targetDto = new TargetDTO(dataDto->getRowNum(), result, dataDto->getId());
+
+        testTargetIn.getline(targetLine, 12);
+        auto *actualTargetDto = new TargetDTO();
+        //delimits using a ","
+        for (int pos = 0; pos < 2; pos++) {
+            testTargetIn.getline(targetLine, 12, ',');
+            switch (pos) {
+                case 0:
+                    actualTargetDto->setRowNum(atoi(targetLine));
+                    break;
+                case 1:
+                    actualTargetDto->setTarget(atoi(targetLine));
+                    break;
+            }
+        }
+        testTargetIn.get(targetLine, 12, '\n');
+        actualTargetDto->setId(atol(targetLine));
+        if (targetDto->getTarget() == actualTargetDto->getTarget()) {
+            correct++;
+        } else {
+            accuracyVector.push_back(targetDto->getId());
+        }
+        totalTweets++;
         JPData = new JPString();
+        delete dataDto;
+    }
+
+    testOut << "Accuracy: ";
+    testOut << correct / totalTweets << endl;
+    int index = 0;
+    //Iterates through the accuracyVector and outputs to a file the IDs of incorrectly analyzed tweets (Vector should be empty ;))
+    while (index < accuracyVector.size()) {
+        testOut << accuracyVector.at(index) << endl;
+        index++;
     }
     delete[] data;
     delete[] username;
