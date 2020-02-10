@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
         cout << "Files Open" << endl;
     }
     cout << "Creating Variables..." << endl;
-    char *line = new char[1024]; //used for file input
+    char *line = new char[2048]; //used for file input
     vector<DataDTO *> trainingVector; //holds the Data from the Training Data File
     vector<DataDTO *> dataVector; //holds the Data from the Testing Data File
     map<JPString, int> wordList; //map for word frequency analysis
@@ -107,7 +107,7 @@ int main(int argc, char **argv) {
 void populateActualTargetVector(ifstream &testTargetIn, vector<TargetDTO *> &actualTargetVector) {
     TargetDTO *targetDto;
     //temp char*
-    char *targetLine = new char[1024];
+    char *targetLine = new char[2048];
     //Itterates through the file of the correct target file
     while (!testTargetIn.eof()) {
         targetDto = new TargetDTO();
@@ -308,7 +308,7 @@ void trainData(vector<DataDTO *> &trainingVector, istream &trainTargetIn, map<JP
     map<JPString, int>::iterator iteratorWordList;
 
     //Temporary Line for file
-    char *targetLine = new char[1024];
+    char *targetLine = new char[2048];
     TargetDTO *targetDto = nullptr;
 
     //Iterates through file
