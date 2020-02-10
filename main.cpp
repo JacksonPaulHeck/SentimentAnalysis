@@ -50,6 +50,7 @@ int main(int argc, char **argv) {
 
     //deletes the trainingTarget vector
     delete[] line;
+    delete[] line2;
     cout << "Actual Target Vector Deleted" << endl;
 
     cout << "end of program" << endl;
@@ -237,7 +238,7 @@ void analyzeData(istream& dataIn, map<JPString, int> &wordList, char *targetLine
     long id = 0;
     char *username = new char[1024];
     char *data = new char[1024];
-    JPString *JPUsername = nullptr;
+    JPString *JPUsername = new JPString();
     auto *JPData = new JPString();
     DataDTO *dataDto = new DataDTO();;
     //Open StopWord File
@@ -255,8 +256,6 @@ void analyzeData(istream& dataIn, map<JPString, int> &wordList, char *targetLine
         k++;
     }
     stopWordStream.close();
-
-
 
     //Loop to parse through data until end of file
 
@@ -326,8 +325,6 @@ void analyzeData(istream& dataIn, map<JPString, int> &wordList, char *targetLine
         //Add each DataDTO to a vector
         //clear the string
 
-
-
     //iterates through the vector of each DataDTO
 
         int j = 0;
@@ -389,8 +386,10 @@ void analyzeData(istream& dataIn, map<JPString, int> &wordList, char *targetLine
         }
         totalTweets++;
         JPData = new JPString();
+        delete dataDto;
         dataDto = new DataDTO();
     }
+    delete dataDto;
 
     testOut << "Accuracy: ";
     testOut << correct / totalTweets << endl;
