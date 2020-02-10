@@ -18,7 +18,6 @@ DataDTO :: DataDTO(int rowNum, long id, JPString* username, JPString* data){
     this->data = data;
 }
 DataDTO :: ~DataDTO(){
-    cout << "Data Destructor" << endl;
     delete[] username;
     delete[] data;
 }

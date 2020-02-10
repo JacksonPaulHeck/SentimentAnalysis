@@ -13,53 +13,109 @@
 //#include "catch.hpp"
 
 void printTestData(vector<DataDTO *>);
-
-vector<DataDTO *> *parseTestData(istream &, char *, vector<DataDTO *> *);
-
-void stopWordOmit(JPString &);
-
-void analyzeData(vector<DataDTO *> *, ostream &, istream &);
-
+void parseTestData(istream &, char *, vector<DataDTO *> &);
+void trainData(vector<DataDTO *> &, ostream &, istream &, map<JPString, int> &, vector<TargetDTO *> &);
+void analyzeData(vector<DataDTO *> &, ofstream &, ifstream &, map<JPString, int> &, vector<TargetDTO *> &);
+void accuracyCalculation(vector<TargetDTO*> &, vector<TargetDTO *> &, ostream&, vector<DataDTO*> &);
 using namespace std;
 
 int main(int argc, char **argv) {
-    //ifstream iss(argv[1]);
-    //ofstream oss(argv[2]);
 
-    ifstream iss("dev-train-data-sm.csv");
-    ofstream oss("output.txt");
-    ifstream targetis("dev-train-target-sm.csv");
-
-    /*ifstream iss("Test.csv");
-    ofstream oss("output.txt");
-    ifstream targetis("Target.csv");*/
-    if (iss.is_open()) {
-        cout << "iss opened" << endl;
-    } else {
-        cout << "not opened" << endl;
-    }
-
+    ofstream testOut("output.txt");
+    ofstream dataOut("output2.txt");
+    ifstream trainingIn("Test.csv");
+    ifstream targetis("Target.csv");
     char *line = new char[1024];
-    vector<DataDTO *> *dataVector = new vector<DataDTO *>;
+    vector<DataDTO *> trainingVector;
+    vector<DataDTO *> dataVector;
+    map<JPString, int> wordList;
+    vector<TargetDTO *> targetVector;
+    vector<TargetDTO *> actualTarget;
 
-    dataVector = parseTestData(iss, line, dataVector);
+    parseTestData(trainingIn, line, trainingVector);
+    trainData(trainingVector, testOut, targetis, wordList, actualTarget);
 
-    cout << dataVector->size() << endl;
+    trainingIn.clear();
+    trainingIn.seekg(0, ios::beg);
 
-    analyzeData(dataVector, oss, targetis);
+    parseTestData(trainingIn, line, dataVector);
+    analyzeData(dataVector, dataOut, trainingIn, wordList, targetVector);
 
-    for (int i = 0; i < dataVector->size(); i++) {
-        delete[] dataVector->at(i);
-    }
-    cout << "end of program" << endl;
-    iss.close();
-    oss.close();
+    accuracyCalculation(targetVector, actualTarget, testOut, dataVector);
+
+    trainingIn.close();
+    testOut.close();
     targetis.close();
+    dataOut.close();
+    cout << "end of program" << endl;
 
     return 0;
 }
 
-vector<DataDTO *> *parseTestData(istream &iss, char *line, vector<DataDTO *> *dataVector) {
+void accuracyCalculation(vector<TargetDTO*> & targetVector, vector<TargetDTO *> &actualTarget, ostream& testOut, vector<DataDTO*> & dataVector){
+    double total = 0;
+    double correct = 0;
+    while (total < targetVector.size() && total < actualTarget.size()) {
+        if (targetVector.at(total)->getTarget() == actualTarget.at(total)->getTarget()) {
+            correct++;
+        } else {
+            testOut << dataVector.at(total)->getRowNum()
+                    << "," << dataVector.at(total)->getId()
+                    << "," << *dataVector.at(total)->getUsername()
+                    << "," << *dataVector.at(total)->getData()
+                    << "\tTarget: " << targetVector.at(total)->getTarget()
+                    << "\tActualTarget: " << actualTarget.at(total)->getTarget()
+                    << endl;
+        }
+        total++;
+    }
+    cout << "Accuracy: ";
+    cout << correct / total << endl;
+}
+void analyzeData(vector<DataDTO *> &dataVector, ofstream &oss, ifstream &iss, map<JPString, int> &wordList,
+                 vector<TargetDTO *> &targetVector) {
+    map<JPString, int>::iterator iteratorWordList;
+    iteratorWordList = wordList.begin();
+    while (iteratorWordList != wordList.end()) {
+        oss << iteratorWordList->first << " : " << iteratorWordList->second << endl;
+        iteratorWordList++;
+    }
+    int i = 0;
+    int result = 0;
+    int total = 0;
+    while (i < dataVector.size()) {
+        int j = 0;
+        JPString data = *dataVector.at(i)->getData();
+        JPString str;
+        while (data[j] != '\0') {
+            total = 0;
+            if (data[j] != ' ') {
+                str += data[j];
+            } else {
+                iteratorWordList = wordList.find(str);
+                if (iteratorWordList != wordList.end()) {
+                    total += iteratorWordList->second;
+                } else {
+                    total += 0;
+                }
+                str = "";
+            }
+            j++;
+        }
+        if (total < 0) {
+            result = 0;
+        } else if (total > 0) {
+            result = 4;
+        } else {
+            result = rand() % 2 * 4;
+        }
+        TargetDTO *targetDto = new TargetDTO(dataVector.at(i)->getRowNum(), result, dataVector.at(i)->getId());
+        targetVector.push_back(targetDto);
+        i++;
+    }
+    targetVector.pop_back();
+}
+void parseTestData(istream &iss, char *line, vector<DataDTO *> &dataVector) {
     int rowNum = 0;
     long id = 0;
     char *username = new char[1024];
@@ -130,28 +186,19 @@ vector<DataDTO *> *parseTestData(istream &iss, char *line, vector<DataDTO *> *da
         dataDto->setUsername(JPusername);
         dataDto->setId(id);
         dataDto->setRowNum(rowNum);
-        dataVector->push_back(dataDto);
+        dataVector.push_back(dataDto);
         JPdata = new JPString();
     }
-    return dataVector;
+    delete[] data;
+    delete[] username;
+    delete[] temp;
 }
-
-void printTestData(vector<DataDTO *> dataVector) {
-    for (int i = 0; i < dataVector.size(); i++) {
-        cout << dataVector[i]->getRowNum() << ":\t"
-             << dataVector[i]->getId() << ":\t"
-             << *dataVector[i]->getUsername() << ":\t"
-             << *dataVector[i]->getData() << endl;
-    }
-}
-
-void analyzeData(vector<DataDTO *> *dataVector, ostream &os, istream &is) {
-    dataVector->pop_back();
-    map<JPString, int> wordList;
+void trainData(vector<DataDTO *> &dataVector, ostream &os, istream &is, map<JPString, int> &wordList,
+               vector<TargetDTO *> &targetVector) {
+    dataVector.pop_back();
     map<JPString, int>::iterator iteratorWordList;
 
     char *targetLine = new char[1024];
-    vector<TargetDTO> targetVector;
     TargetDTO *targetDto = nullptr;
     while (!is.eof()) {
         targetDto = new TargetDTO();
@@ -169,16 +216,16 @@ void analyzeData(vector<DataDTO *> *dataVector, ostream &os, istream &is) {
                     break;
             }
         }
-        targetVector.push_back(*targetDto);
+        targetVector.push_back(targetDto);
     }
     int i = 0;
-    while (i < dataVector->size()) {
+    while (i < dataVector.size()) {
         int j = 0;
-        JPString data = *dataVector->at(i)->getData();
+        JPString data = *dataVector.at(i)->getData();
         JPString str;
         int add;
         while (data[j] != '\0') {
-            if (targetVector.at(i).getTarget() > 0) {
+            if (targetVector.at(i)->getTarget() > 0) {
                 add = 1;
             } else { add = -1; }
             if (data[j] != ' ') {
@@ -195,10 +242,5 @@ void analyzeData(vector<DataDTO *> *dataVector, ostream &os, istream &is) {
             j++;
         }
         i++;
-    }
-    iteratorWordList = wordList.begin();
-    while (iteratorWordList != wordList.end()) {
-        os << iteratorWordList->first << " : " << iteratorWordList->second << endl;
-        iteratorWordList++;
     }
 }

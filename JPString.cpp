@@ -43,7 +43,7 @@ JPString::JPString(const JPString &jpString) {
 }
 
 JPString::~JPString() {
-    delete[] data;
+        delete[] data;
 }
 
 int JPString::size() const {
