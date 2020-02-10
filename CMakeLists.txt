@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.10.2)
 project(S20-PA01-SentimentAnalysis)
 set(EXE_NAME SentimentAnalyzer)
 

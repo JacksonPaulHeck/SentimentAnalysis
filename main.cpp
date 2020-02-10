@@ -50,8 +50,9 @@ int main(int argc, char **argv) {
     trainData(trainingVector, trainTargetIn, wordList, trainingTargetVector);
     int k = 0;
     while (k < trainingVector.size()) {
-        delete (trainingVector.at(k));
-        k++;
+        if(trainingVector.at(k) != NULL) {
+            delete (trainingVector.at(k));
+        }k++;
     }
 
     cout << "The Data Has Been Trained" << endl;
@@ -82,16 +83,20 @@ int main(int argc, char **argv) {
     //deletes the trainingTarget vector
     k = 0;
     while (k < trainingTargetVector.size()) {
-        delete (trainingTargetVector.at(k));
-        k++;
+        if(trainingTargetVector.at(k) != NULL) {
+            delete (trainingTargetVector.at(k));
+        }k++;
     }
     cout << "Training Target Vector Deleted" << endl;
     //deletes the actual target Vector
     k = 0;
     while (k < actualTargetVector.size()) {
-        delete (actualTargetVector.at(k));
-        k++;
+        if(actualTargetVector.at(k) != NULL) {
+            delete (actualTargetVector.at(k));
+        }k++;
     }
+    delete[] line;
+
     cout << "Actual Target Vector Deleted" << endl;
 
     cout << "end of program" << endl;
