@@ -12,15 +12,15 @@ set(EXE_NAME SentimentAnalyzer)
 #   set (input02 "train_target.csv")
 # etc....
 
-set(input01 "dev-train-data.csv")
-set(input02 "dev-train-target.csv")
-set(input03 "dev-test-target.csv")
-set(input04 "dev-test-data.csv")
-
 #set(input01 "dev-train-data-sm.csv")
 #set(input02 "dev-train-target-sm.csv")
 #set(input03 "TestData.csv")
-#set(input04 "TestTarget.csv")
+#set(input04 "dev-test-data.csv")
+
+set(input01 "dev-train-data-sm.csv")
+set(input02 "dev-train-target-sm.csv")
+set(input03 "TestData.csv")
+set(input04 "TestTarget.csv")
 set(input05 "StopWordList.csv")
 
 #set(input01 "TestingFile.csv")
