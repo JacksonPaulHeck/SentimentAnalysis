@@ -8,7 +8,7 @@
 #include <map>
 
 
-void parseData(istream &dataIn, char *line, vector<DataDTO *> &dataVector);
+void parseData(istream &, char *, vector<DataDTO *> &);
 
 void trainData(vector<DataDTO *> &, istream &, map<JPString, int> &, vector<TargetDTO *> &);
 
@@ -16,7 +16,9 @@ void analyzeData(vector<DataDTO *> &, map<JPString, int> &, vector<TargetDTO *> 
 
 void accuracyCalculation(vector<TargetDTO *> &, vector<TargetDTO *> &, ostream &);
 
-void populateActualTargetVector(ifstream &testTargetIn, vector<TargetDTO *> &);
+void populateActualTargetVector(ifstream &, vector<TargetDTO *> &, char*&);
+
+void parseDataAndTrain(istream &, istream &, char *, map<JPString, int> &);
 
 using namespace std;
 
@@ -36,7 +38,6 @@ int main(int argc, char **argv) {
     }
     cout << "Creating Variables..." << endl;
     char *line = new char[2048]; //used for file input
-    vector<DataDTO *> trainingVector; //holds the Data from the Training Data File
     vector<DataDTO *> dataVector; //holds the Data from the Testing Data File
     map<JPString, int> wordList; //map for word frequency analysis
     vector<TargetDTO *> trainingTargetVector; //holds the Data from the Training Target File
@@ -44,33 +45,27 @@ int main(int argc, char **argv) {
     cout << "Variables Created" << endl;
 
     cout << "Parsing Training Data..." << endl;
-    parseData(trainDataIn, line, trainingVector);
+    parseDataAndTrain(trainDataIn, trainTargetIn, line, wordList);
     cout << "Consider it Parsed" << endl;
     cout << "Training Data..." << endl;
-    trainData(trainingVector, trainTargetIn, wordList, trainingTargetVector);
-    int k = 0;
-    while (k < trainingVector.size()) {
-        if(trainingVector.at(k) != NULL) {
-            delete (trainingVector.at(k));
-        }k++;
-    }
 
     cout << "The Data Has Been Trained" << endl;
     cout << "Populating Actual Target Vector..." << endl;
-    populateActualTargetVector(testTargetIn, actualTargetVector);
+    populateActualTargetVector(testTargetIn, actualTargetVector, line);
     cout << "Target Vector Actually Populated" << endl;
 
     trainDataIn.clear();
     trainDataIn.seekg(0, ios::beg);
+
     cout << "Parsing Actual Data..." << endl;
-    parseData(testDataIn, line, dataVector);
+  //  parseData(testDataIn, line, dataVector);
     cout << "Data Actually Parsed" << endl;
     cout << "Analyzing Data..." << endl;
-    analyzeData(dataVector, wordList, trainingTargetVector);
+ //   analyzeData(dataVector, wordList, trainingTargetVector);
 
     cout << "Data Analyzed" << endl;
     cout << "Calculating Accuracy..." << endl;
-    accuracyCalculation(trainingTargetVector, actualTargetVector, outFile);
+  //  accuracyCalculation(trainingTargetVector, actualTargetVector, outFile);
     cout << "Close Enough" << endl;
     cout << "Closing Files" << endl;
     trainDataIn.close();
@@ -81,19 +76,21 @@ int main(int argc, char **argv) {
     cout << "Files Closed" << endl;
 
     //deletes the trainingTarget vector
-    k = 0;
+    int k = 0;
     while (k < trainingTargetVector.size()) {
-        if(trainingTargetVector.at(k) != NULL) {
+        if (trainingTargetVector.at(k) != NULL) {
             delete (trainingTargetVector.at(k));
-        }k++;
+        }
+        k++;
     }
     cout << "Training Target Vector Deleted" << endl;
     //deletes the actual target Vector
     k = 0;
     while (k < actualTargetVector.size()) {
-        if(actualTargetVector.at(k) != NULL) {
+        if (actualTargetVector.at(k) != NULL) {
             delete (actualTargetVector.at(k));
-        }k++;
+        }
+        k++;
     }
     delete[] line;
 
@@ -104,11 +101,172 @@ int main(int argc, char **argv) {
     return 0;
 }
 
-void populateActualTargetVector(ifstream &testTargetIn, vector<TargetDTO *> &actualTargetVector) {
-    TargetDTO *targetDto;
-    //temp char*
+void parseDataAndTrain(istream &trainingDataIn, istream &trainingTargetIn, char *line, map<JPString, int> &wordList) {
+    //Declare Variables for parseData function
+    int rowNum = 0;
+    long id = 0;
+    char *username = new char[2048];
+    char *data = new char[2048];
+
+    //Open StopWord File
+    ifstream stopWordStream("StopWordList.csv");
+    char *temp = new char[20];
+    vector<JPString*> jpStringVec;
+    vector<JPString*> stopWordVector;
+    map<JPString, int>::iterator iteratorWordList;
+    //Temporary Line for file
     char *targetLine = new char[2048];
-    //Itterates through the file of the correct target file
+
+    //Add stop words to vector
+    int k = 0;
+    int j = 0;
+    stopWordStream.getline(temp, 20);
+    while (!stopWordStream.eof()) {
+        JPString* JPTemp = new JPString(temp);
+        stopWordVector.push_back(JPTemp);
+        stopWordStream.getline(temp, 20);
+        k++;
+    }
+    stopWordStream.close();
+    //Loop to parse through data until end of file
+
+    while (!trainingDataIn.eof() && !trainingTargetIn.eof()) {
+        auto JPData = new JPString();
+        auto *dataDto = new DataDTO();
+        auto *JPUsername = new JPString();
+        auto *targetDto = new TargetDTO();
+        //Parse through each line using comma as a delimeter
+        for (int pos = 0; pos < 3; pos++) {
+            trainingDataIn.getline(line, 2048, ',');
+            switch (pos % 3) {
+                case 0:
+                    rowNum = atoi(line);
+                    break;
+                case 1:
+                    id = atol(line);
+                    break;
+                case 2:
+                    delete(JPUsername);
+                    strncpy(username, line, 2048);
+                    JPUsername = new JPString(username);
+                    break;
+            }
+        }
+        //get "string" of data
+        trainingDataIn.get(line, 2048, '\n');
+        strncpy(data, line, 2048);
+        //make data lowercase
+        int r = 0;
+        while (data[r] != '\0') {
+            data[r] = tolower(data[r]);
+            r++;
+        }
+        //remove all characters that are not letters
+        char *token = strtok(data, "  :\t\t´И\u0012'\"£©\u009F¼¬ï¿½.;,`@#$%^&*()_-!?\r/1234567890");
+        //add each word to vector jpStringVec
+        while (token != NULL) {
+            JPString* JPToken = new JPString(token);
+            jpStringVec.push_back(JPToken);
+            token = strtok(NULL, "  :\t\t´И\u0012'\"£©\u009F¼¬ï¿½.;,`@#$%^&*()_-!?\r/1234567890");
+        }
+        //compare each element of jpStringVec to each value in stopWordVector
+        for (int i = 0; i < jpStringVec.size(); i++) {
+            j = 0;
+            bool isEqual = false;
+            while (j < stopWordVector.size()) {
+                //if element is a stopWord remove it from the string
+                if (jpStringVec.at(i) == stopWordVector.at(j)) {
+                    isEqual = true;
+                }
+                j++;
+            }
+            //Create JPString of the data
+            if (!isEqual && jpStringVec.at(i)->size() > 2) {
+                *JPData += *jpStringVec.at(i);
+                *JPData += " ";
+            }
+        }
+        //clear vector
+        jpStringVec.clear();
+
+        //Populate a DataDTO with the data
+        dataDto->setData(JPData);
+        dataDto->setUsername(JPUsername);
+        dataDto->setId(id);
+        dataDto->setRowNum(rowNum);
+
+
+        //Iterates through file
+
+        //Reads data in, delimites using a comma, sets the TargetDTO equal to the data from the file
+        for (int pos = 0; pos < 2; pos++) {
+            trainingTargetIn.getline(targetLine, 12, ',');
+            switch (pos) {
+                case 0:
+                    targetDto->setRowNum(atoi(targetLine));
+                    break;
+                case 1:
+                    targetDto->setTarget(atoi(targetLine));
+                    break;
+            }
+        }
+        trainingTargetIn.get(targetLine, 12, '\n');
+        targetDto->setId(atol(targetLine));
+        //Adds the dto to a vector
+
+        //Iterates through the vector
+        j = 0;
+        JPString JPStringData = *dataDto->getData();
+        JPString str;
+        int add;
+        //Iterates through the JPString checking for an end line character
+        while (JPStringData[j] != '\0') {
+            //Sets the add variable to what the entire tweets value is
+            if (targetDto->getTarget() > 0) {
+                add = 1;
+            } else {
+                add = -1;
+            }
+            if (JPStringData[j] != ' ') {
+                str += JPStringData[j];
+            }
+                //Delimites by space to find full words
+            else {
+                //Looks for the word in the map
+                iteratorWordList = wordList.find(str);
+                //if found, add the value from the training target to that word
+                if (iteratorWordList != wordList.end()) {
+                    wordList[str] = iteratorWordList->second + add;
+                }
+                    //Creates the word in the map if not found
+                else if (iteratorWordList == wordList.end()) {
+                    wordList[str] = add;
+                }
+                //resets the word to ""
+                str = "";
+            }
+            j++;
+        }
+        //clear the string
+        delete(dataDto);
+        delete(targetDto);
+        delete(JPUsername);
+        delete(JPData);
+
+        int k = 0;
+        while(k < jpStringVec.size()){
+            delete(jpStringVec.at(k));
+            k++;
+        }
+    }
+    delete[] data;
+    delete[] username;
+    delete[] temp;
+}
+
+void populateActualTargetVector(ifstream &testTargetIn, vector<TargetDTO *> &actualTargetVector, char * &targetLine) {
+    testTargetIn.getline(targetLine, 12);
+    TargetDTO *targetDto;
     while (!testTargetIn.eof()) {
         targetDto = new TargetDTO();
         //delimits using a ","
