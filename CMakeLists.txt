@@ -14,14 +14,14 @@ set (EXE_NAME SentimentAnalyzer)
 # etc....
 
 set (input01 "dev-train-data-sm.csv")
-set (input02 "StopWordList.csv")
-set (input04 "dev-train-target-sm.csv")
+set (input02 "dev-train-target-sm.csv")
+set (input03 "StopWordList.csv")
 
 #
 ##########################################
 
 # Copy data files to build dir
-foreach(file IN LISTS input01)
+foreach(file IN LISTS input01 input02 input03)
     configure_file(${file} ${file} COPYONLY)
 endforeach()
 
