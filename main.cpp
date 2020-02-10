@@ -239,7 +239,7 @@ void analyzeData(istream& dataIn, map<JPString, int> &wordList, char *targetLine
     char *data = new char[1024];
     JPString *JPUsername = nullptr;
     auto *JPData = new JPString();
-    DataDTO *dataDto = nullptr;
+    DataDTO *dataDto = new DataDTO();;
     //Open StopWord File
     ifstream stopWordStream("StopWordList.csv");
     char *temp = new char[20];
@@ -264,7 +264,7 @@ void analyzeData(istream& dataIn, map<JPString, int> &wordList, char *targetLine
     dataIn.seekg(0, ios::beg);
 
     while (!dataIn.eof()) {
-        dataDto = new DataDTO();
+
         //Parse through each line using comma as a delimeter
         for (int pos = 0; pos < 3; pos++) {
             dataIn.getline(line, 1024, ',');
@@ -390,7 +390,9 @@ void analyzeData(istream& dataIn, map<JPString, int> &wordList, char *targetLine
         totalTweets++;
         JPData = new JPString();
         delete dataDto;
+        dataDto = new DataDTO();
     }
+    delete dataDto;
 
     testOut << "Accuracy: ";
     testOut << correct / totalTweets << endl;
