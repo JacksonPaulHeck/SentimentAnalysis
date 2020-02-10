@@ -6,8 +6,7 @@
 #include "TargetDTO.h"
 #include "DataDTO.h"
 #include <map>
-//#define CATCH_CONFIG_RUNNER
-//#include "catch.hpp"
+
 
 void parseData(istream &dataIn, char *line, vector<DataDTO *> &dataVector);
 
@@ -23,16 +22,8 @@ using namespace std;
 
 int main(int argc, char **argv) {
 
-//    ofstream outFile("output.txt");
-//    ifstream trainDataIn("dev-train-data-sm.csv");
-//    ifstream trainTargetIn("dev-train-target-sm.csv");
-//    ifstream testDataIn("dev-test-data.csv");
-//    ifstream testTargetIn("dev-test-target.csv");
-//    ofstream outFile("output.txt");
-//    ifstream trainDataIn("TrainData.csv");
-//    ifstream trainTargetIn("TrainTarget.csv");
-//    ifstream testDataIn("TestData.csv");
-//    ifstream testTargetIn("TestTarget.csv");
+    cout << "TweetBot -> At ur service" << endl;
+    cout << "Opening Files..." << endl;
     ofstream outFile(argv[1]);
     ifstream trainDataIn(argv[2]);
     ifstream trainTargetIn(argv[3]);
@@ -43,93 +34,99 @@ int main(int argc, char **argv) {
         testTargetIn.is_open()) {
         cout << "Files Open" << endl;
     }
-    char *line = new char[1024];
-    vector<DataDTO *> trainingVector;
-    vector<DataDTO *> dataVector;
-    map<JPString, int> wordList;
-    vector<TargetDTO *> trainingTargetVector;
-    vector<TargetDTO *> actualTargetVector;
+    cout << "Creating Variables..." << endl;
+    char *line = new char[1024]; //used for file input
+    vector<DataDTO *> trainingVector; //holds the Data from the Training Data File
+    vector<DataDTO *> dataVector; //holds the Data from the Testing Data File
+    map<JPString, int> wordList; //map for word frequency analysis
+    vector<TargetDTO *> trainingTargetVector; //holds the Data from the Training Target File
+    vector<TargetDTO *> actualTargetVector; //holds the data from the Testing Target File
     cout << "Variables Created" << endl;
 
+    cout << "Parsing Training Data..." << endl;
     parseData(trainDataIn, line, trainingVector);
-    cout << "Parsed Training Data" << endl;
+    cout << "Consider it Parsed" << endl;
+    cout << "Training Data..." << endl;
     trainData(trainingVector, trainTargetIn, wordList, trainingTargetVector);
-    cout << "Trained Data" << endl;
-    int k = 0;
-    while(k < trainingVector.size()){
-        delete(trainingVector.at(k));
-        k++;
-    }
-
+    cout << "The Data Has Been Trained" << endl;
+    cout << "Populating Actual Target Vector..." << endl;
     populateActualTargetVector(testTargetIn, actualTargetVector);
-    cout << "Populated Actual Target Vector" << endl;
+    cout << "Target Vector Actually Populated" << endl;
 
     trainDataIn.clear();
     trainDataIn.seekg(0, ios::beg);
-
+    cout << "Parsing Actual Data..." << endl;
     parseData(testDataIn, line, dataVector);
-    cout << "Parsed Actual Data" << endl;
+    cout << "Data Actually Parsed" << endl;
+    cout << "Analyzing Data..." << endl;
     analyzeData(dataVector, wordList, trainingTargetVector);
-    cout << "Analyzed Data" << endl;
-
-    k = 0;
-    while(k < dataVector.size()){
-        delete(dataVector.at(k));
-        k++;
-    }
-    cout << "Data Vector Deleted" << endl;
-
+    cout << "Data Analyzed" << endl;
+    cout << "Calculating Accuracy..." << endl;
     accuracyCalculation(trainingTargetVector, actualTargetVector, outFile);
-
-    k = 0;
-    while(k < trainingTargetVector.size()){
-        delete(trainingTargetVector.at(k));
-        k++;
-    }
-    k=0;
-    while(k < actualTargetVector.size()){
-        delete(actualTargetVector.at(k));
-        k++;
-    }
-
+    cout << "Close Enough" << endl;
+    cout << "Closing Files" << endl;
     trainDataIn.close();
     outFile.close();
     trainTargetIn.close();
     testDataIn.close();
     testTargetIn.close();
+    cout << "Files Closed" << endl;
+
+    //deletes the trainingTarget vector
+    int k = 0;
+    k = 0;
+    while (k < trainingTargetVector.size()) {
+        delete (trainingTargetVector.at(k));
+        k++;
+    }
+    cout << "Training Target Vector Deleted" << endl;
+    //deletes the actual target Vector
+    k = 0;
+    while (k < actualTargetVector.size()) {
+        delete (actualTargetVector.at(k));
+        k++;
+    }
+    cout << "Actual Target Vector Deleted" << endl;
+
     cout << "end of program" << endl;
 
     return 0;
 }
 
 void populateActualTargetVector(ifstream &testTargetIn, vector<TargetDTO *> &actualTargetVector) {
-    TargetDTO* targetDto;
+    TargetDTO *targetDto;
+    //temp char*
     char *targetLine = new char[1024];
+    //Itterates through the file of the correct target file
     while (!testTargetIn.eof()) {
         targetDto = new TargetDTO();
+        //delimits using a ","
         for (int pos = 0; pos < 2; pos++) {
-            testTargetIn.getline(targetLine, 1024, ',');
-            switch (pos % 2) {
+            testTargetIn.getline(targetLine, 12, ',');
+            switch (pos) {
                 case 0:
                     targetDto->setRowNum(atoi(targetLine));
                     break;
                 case 1:
                     targetDto->setTarget(atoi(targetLine));
                     break;
-                case 2:
-                    targetDto->setId(atol(targetLine));
-                    break;
             }
         }
+        testTargetIn.get(targetLine, 12, '\n');
+        targetDto->setId(atol(targetLine));
+        //adds the TargetDTOs to a vector
         actualTargetVector.push_back(targetDto);
     }
 }
 
 void accuracyCalculation(vector<TargetDTO *> &targetVector, vector<TargetDTO *> &actualTarget, ostream &testOut) {
+    //creates a vector of longs
     vector<long> accuracyVector;
     double total = 0;
     double correct = 0;
+    //iterates through each of the target and actual vectors
     while (total < targetVector.size() && total < actualTarget.size()) {
+        //if they are equal add one to correct, else add the ID of the incorrect tweet to the vector
         if (targetVector.at(total)->getTarget() == actualTarget.at(total)->getTarget()) {
             correct++;
         } else {
@@ -140,29 +137,38 @@ void accuracyCalculation(vector<TargetDTO *> &targetVector, vector<TargetDTO *> 
     testOut << "Accuracy: ";
     testOut << correct / total << endl;
     int index = 0;
+    //Iterates through the accuracyVector and outputs to a file the IDs of incorrectly analyzed tweets (Vector should be empty ;))
     while (index < accuracyVector.size()) {
-        testOut << accuracyVector.at(index);
+        testOut << accuracyVector.at(index) << endl;
         index++;
     }
 }
 
 void analyzeData(vector<DataDTO *> &dataVector, map<JPString, int> &wordList,
                  vector<TargetDTO *> &trainingTargetVector) {
+    //Creates an iterator for the map
     map<JPString, int>::iterator iteratorWordList;
     int i = 0;
     int result = 0;
     int total = 0;
+    //iterates through the vector of each DataDTO
     while (i < dataVector.size()) {
         int j = 0;
         JPString data = *dataVector.at(i)->getData();
         JPString str;
+        //itterates through each DataDTO's data for the endline character
         while (data[j] != '\0') {
             total = 0;
+            //delimites using a " "
             if (data[j] != ' ') {
                 str += data[j];
-            } else {
+            }
+                //if full word, look for it in the map
+            else {
                 iteratorWordList = wordList.find(str);
-                if (iteratorWordList != wordList.end()) {
+                //while itterating through the list, gets the total, either pos or neg
+                if (iteratorWordList != wordList.end() &&
+                    (iteratorWordList->second > 3 || iteratorWordList->second < -3)) {
                     total += iteratorWordList->second;
                 } else {
                     total += 0;
@@ -171,13 +177,16 @@ void analyzeData(vector<DataDTO *> &dataVector, map<JPString, int> &wordList,
             }
             j++;
         }
+        //sets the result of the whole string to the sum of its parts
         if (total < 0) {
             result = 0;
         } else if (total > 0) {
             result = 4;
         } else {
-            result = rand() % 2 * 4;
+            srand(3141592);
+            result = (rand() % 2) * 4;
         }
+        //adds a new TargetDTO with the Guesses of sentiment to a vector
         auto *targetDto = new TargetDTO(dataVector.at(i)->getRowNum(), result, dataVector.at(i)->getId());
         trainingTargetVector.push_back(targetDto);
         i++;
@@ -209,7 +218,6 @@ void parseData(istream &dataIn, char *line, vector<DataDTO *> &dataVector) {
         k++;
     }
     stopWordStream.close();
-    int r =0;
     //Loop to parse through data until end of file
     while (!dataIn.eof()) {
         dataDto = new DataDTO();
@@ -274,7 +282,6 @@ void parseData(istream &dataIn, char *line, vector<DataDTO *> &dataVector) {
         //Add each DataDTO to a vector
         dataVector.push_back(dataDto);
         //clear the string
-        delete JPData;
         JPData = new JPString();
     }
     delete[] data;
@@ -282,51 +289,69 @@ void parseData(istream &dataIn, char *line, vector<DataDTO *> &dataVector) {
     delete[] temp;
 }
 
-void trainData(vector<DataDTO *> &dataVector, istream &trainTargetIn, map<JPString, int> &wordList,
+void trainData(vector<DataDTO *> &trainingVector, istream &trainTargetIn, map<JPString, int> &wordList,
                vector<TargetDTO *> &targetVector) {
-    dataVector.pop_back();
+    cout << "Start of Training" << endl;
+    //Pops the part of the data with header of file off the vector
+    trainingVector.pop_back();
+    //creates an iterator for the map
     map<JPString, int>::iterator iteratorWordList;
 
+    //Temporary Line for file
     char *targetLine = new char[1024];
     TargetDTO *targetDto = nullptr;
+
+    //Iterates through file
     while (!trainTargetIn.eof()) {
         targetDto = new TargetDTO();
+        //Reads data in, delimites using a comma, sets the TargetDTO equal to the data from the file
         for (int pos = 0; pos < 2; pos++) {
-            trainTargetIn.getline(targetLine, 1024, ',');
-            switch (pos % 2) {
+            trainTargetIn.getline(targetLine, 12, ',');
+            switch (pos) {
                 case 0:
                     targetDto->setRowNum(atoi(targetLine));
                     break;
                 case 1:
                     targetDto->setTarget(atoi(targetLine));
                     break;
-                case 2:
-                    targetDto->setId(atol(targetLine));
-                    break;
             }
         }
+        trainTargetIn.get(targetLine, 12, '\n');
+        targetDto->setId(atol(targetLine));
+        //Adds the dto to a vector
         targetVector.push_back(targetDto);
     }
     int i = 0;
-    int r =0;
-    while (i < dataVector.size()) {
+    //Iterates through the vector
+    while (i < trainingVector.size()) {
         int j = 0;
-        JPString data = *dataVector.at(i)->getData();
+        JPString data = *trainingVector.at(i)->getData();
         JPString str;
         int add;
+        //Iterates through the JPString checking for an end line character
         while (data[j] != '\0') {
+            //Sets the add variable to what the entire tweets value is
             if (targetVector.at(i)->getTarget() > 0) {
                 add = 1;
-            } else { add = -1; }
+            } else {
+                add = -1;
+            }
             if (data[j] != ' ') {
                 str += data[j];
-            } else {
+            }
+                //Delimites by space to find full words
+            else {
+                //Looks for the word in the map
                 iteratorWordList = wordList.find(str);
+                //if found, add the value from the training target to that word
                 if (iteratorWordList != wordList.end()) {
                     wordList[str] = iteratorWordList->second + add;
-                } else if (iteratorWordList == wordList.end()) {
+                }
+                    //Creates the word in the map if not found
+                else if (iteratorWordList == wordList.end()) {
                     wordList[str] = add;
                 }
+                //resets the word to ""
                 str = "";
             }
             j++;

@@ -3,16 +3,22 @@
 //
 
 #include "TargetDTO.h"
+
+//Empty Constructor
 TargetDTO :: TargetDTO(){
     this->rowNum = 0;
     this->target = 0;
     this->id = 0;
 }
+
+//Full Constructor
 TargetDTO :: TargetDTO(int RowNum, int Target, long ID){
     this->rowNum = RowNum;
     this->target = Target;
     this->id = ID;
 }
+
+//Getters and Setters
 bool TargetDTO :: setRowNum(int RowNum){
     this->rowNum = RowNum;
     return true;

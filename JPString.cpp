@@ -5,17 +5,17 @@
 #include "JPString.h"
 
 using namespace std;
-
+//Empty Constructor
 JPString::JPString() {
     length = 0;
     data = new char[0];
 }
-
+//Constructor with char as param
 JPString::JPString(char input) {
     length = 1;
     data = new char(input);
 }
-
+//Constructor with char* as param
 JPString::JPString(const char *input) {
     if (input) {
         int i = 0;
@@ -32,7 +32,7 @@ JPString::JPString(const char *input) {
         data = new char[0];
     }
 }
-
+//Constructor with JPString as param i.e. copyConstructor
 JPString::JPString(const JPString &jpString) {
     length = jpString.size();
     data = new char[length];
@@ -40,15 +40,15 @@ JPString::JPString(const JPString &jpString) {
         data[i] = jpString[i];
     }
 }
-
+//Destructor
 JPString::~JPString() {
-        delete[] data;
+        delete data;
 }
-
+//Returns the size of the JPString
 int JPString::size() const {
     return length;
 }
-
+//Assignment Operator
 JPString &JPString::operator=(const JPString &jpString) {
     if (this == &jpString) {
         return *this;
@@ -61,7 +61,6 @@ JPString &JPString::operator=(const JPString &jpString) {
     }
     return *this;
 }
-
 JPString &JPString::operator=(const char *Data) {
     if (this->data == Data) {
         return *this;
@@ -79,6 +78,7 @@ JPString &JPString::operator=(const char *Data) {
     return *this;
 }
 
+//Equality Comparison Operator
 bool operator==(const JPString &jpString, const JPString &jpString1) {
     if (jpString.size() != jpString1.size()) {
         return false;
@@ -90,15 +90,16 @@ bool operator==(const JPString &jpString, const JPString &jpString1) {
     }
     return i == len;
 }
-
 bool operator==(const JPString &jpString, const char *jpString1) {
     return jpString == JPString(jpString1);
 }
 
+//Anti-Equality Comparison Operator
 bool JPString::operator!=(char character) {
     return *this->data != character;
 }
 
+//this  = this + something else
 JPString JPString::operator+=(const JPString &jpString) {
     int lengthCombo = length + jpString.size();
     char *temp = new char[lengthCombo];
@@ -114,10 +115,12 @@ JPString JPString::operator+=(const JPString &jpString) {
     return *this;
 }
 
+//Indexing Operator
 char &JPString::operator[](int i) const {
     return data[i];
 }
 
+//Ostream Operator
 ostream &operator<<(ostream &outStream, const JPString &jpString) {
     if (jpString.size() > 0) {
         for (int i = 0; i < jpString.size(); i++) {
@@ -128,6 +131,8 @@ ostream &operator<<(ostream &outStream, const JPString &jpString) {
     }
     return outStream;
 }
+
+//Greater than Comparator
 bool operator > (const JPString& jpString, const JPString& jpString1)
 {
     int cap = (JPString().size() < jpString1.size()) ? jpString.size() : jpString1.size();
@@ -145,6 +150,7 @@ bool operator > (const JPString& jpString, const JPString& jpString1)
     return jpString[n] > jpString1[n];
 }
 
+//IStream Operator
 istream &operator>>(istream &inStream, JPString &jpString) {
     char *temp = new char[1024];
     inStream >> temp;
@@ -153,6 +159,7 @@ istream &operator>>(istream &inStream, JPString &jpString) {
     return inStream;
 }
 
+//Less than Comparator
 bool operator<(const JPString & jpString, const JPString & jpString1) {
     return !(jpString == jpString1) && !(jpString > jpString1);
 }

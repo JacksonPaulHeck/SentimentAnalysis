@@ -5,22 +5,29 @@
 #include "DataDTO.h"
 #include "TargetDTO.h"
 
+//Empty Constructor
 DataDTO :: DataDTO(){
     this->rowNum = 0;
     this->id = 0;
     this->username = nullptr;
     this->data = nullptr;
 }
+
+//Full Constructor
 DataDTO :: DataDTO(int rowNum, long id, JPString* username, JPString* data){
     this->rowNum = rowNum;
     this->id = id;
     this->username = username;
     this->data = data;
 }
+
+//Destructor
 DataDTO :: ~DataDTO(){
     delete[] username;
     delete[] data;
 }
+
+//Getters and Setters
 bool DataDTO :: setRowNum(int Row){
     this->rowNum = Row;
     return true;
