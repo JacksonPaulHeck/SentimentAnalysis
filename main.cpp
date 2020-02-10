@@ -209,8 +209,8 @@ void parseData(istream &dataIn, char *line, vector<DataDTO *> &dataVector) {
     //Declare Variables for parseData function
     int rowNum = 0;
     long id = 0;
-    char *username = new char[1024];
-    char *data = new char[1024];
+    char *username = new char[2048];
+    char *data = new char[2048];
     JPString *JPUsername = nullptr;
     auto JPData = new JPString();
     DataDTO *dataDto = nullptr;
@@ -234,7 +234,7 @@ void parseData(istream &dataIn, char *line, vector<DataDTO *> &dataVector) {
         dataDto = new DataDTO();
         //Parse through each line using comma as a delimeter
         for (int pos = 0; pos < 3; pos++) {
-            dataIn.getline(line, 1024, ',');
+            dataIn.getline(line, 2048, ',');
             switch (pos % 3) {
                 case 0:
                     rowNum = atoi(line);
@@ -243,14 +243,14 @@ void parseData(istream &dataIn, char *line, vector<DataDTO *> &dataVector) {
                     id = atol(line);
                     break;
                 case 2:
-                    strncpy(username, line, 1024);
+                    strncpy(username, line, 2048);
                     JPUsername = new JPString(username);
                     break;
             }
         }
         //get "string" of data
-        dataIn.get(line, 1024, '\n');
-        strncpy(data, line, 1024);
+        dataIn.get(line, 2048, '\n');
+        strncpy(data, line, 2048);
         //make data lowercase
         int r = 0;
         while (data[r] != '\0') {
