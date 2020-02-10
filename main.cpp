@@ -48,6 +48,12 @@ int main(int argc, char **argv) {
     cout << "Consider it Parsed" << endl;
     cout << "Training Data..." << endl;
     trainData(trainingVector, trainTargetIn, wordList, trainingTargetVector);
+    int k = 0;
+    while (k < trainingVector.size()) {
+        delete (trainingVector.at(k));
+        k++;
+    }
+
     cout << "The Data Has Been Trained" << endl;
     cout << "Populating Actual Target Vector..." << endl;
     populateActualTargetVector(testTargetIn, actualTargetVector);
@@ -60,6 +66,7 @@ int main(int argc, char **argv) {
     cout << "Data Actually Parsed" << endl;
     cout << "Analyzing Data..." << endl;
     analyzeData(dataVector, wordList, trainingTargetVector);
+
     cout << "Data Analyzed" << endl;
     cout << "Calculating Accuracy..." << endl;
     accuracyCalculation(trainingTargetVector, actualTargetVector, outFile);
@@ -73,7 +80,6 @@ int main(int argc, char **argv) {
     cout << "Files Closed" << endl;
 
     //deletes the trainingTarget vector
-    int k = 0;
     k = 0;
     while (k < trainingTargetVector.size()) {
         delete (trainingTargetVector.at(k));
@@ -168,7 +174,7 @@ void analyzeData(vector<DataDTO *> &dataVector, map<JPString, int> &wordList,
                 iteratorWordList = wordList.find(str);
                 //while itterating through the list, gets the total, either pos or neg
                 if (iteratorWordList != wordList.end() &&
-                    (iteratorWordList->second > 3 || iteratorWordList->second < -3)) {
+                    (iteratorWordList->second > 10 || iteratorWordList->second < -10)) {
                     total += iteratorWordList->second;
                 } else {
                     total += 0;
@@ -291,7 +297,6 @@ void parseData(istream &dataIn, char *line, vector<DataDTO *> &dataVector) {
 
 void trainData(vector<DataDTO *> &trainingVector, istream &trainTargetIn, map<JPString, int> &wordList,
                vector<TargetDTO *> &targetVector) {
-    cout << "Start of Training" << endl;
     //Pops the part of the data with header of file off the vector
     trainingVector.pop_back();
     //creates an iterator for the map

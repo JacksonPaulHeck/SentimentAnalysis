@@ -18,7 +18,6 @@ private:
 public:
     DataDTO();
     DataDTO(int, long, JPString*, JPString*);
-    ~DataDTO();
     bool setRowNum(int);
     int getRowNum();
     bool setId(long);

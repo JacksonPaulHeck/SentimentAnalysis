@@ -20,13 +20,6 @@ DataDTO :: DataDTO(int rowNum, long id, JPString* username, JPString* data){
     this->username = username;
     this->data = data;
 }
-
-//Destructor
-DataDTO :: ~DataDTO(){
-    delete[] username;
-    delete[] data;
-}
-
 //Getters and Setters
 bool DataDTO :: setRowNum(int Row){
     this->rowNum = Row;
