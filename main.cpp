@@ -238,7 +238,7 @@ void analyzeData(istream& dataIn, map<JPString, int> &wordList, char *targetLine
     char *username = new char[1024];
     char *data = new char[1024];
     JPString *JPUsername = nullptr;
-    auto JPData = new JPString();
+    auto *JPData = new JPString();
     DataDTO *dataDto = nullptr;
     //Open StopWord File
     ifstream stopWordStream("StopWordList.csv");
