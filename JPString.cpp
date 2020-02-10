@@ -8,7 +8,7 @@ using namespace std;
 //Empty Constructor
 JPString::JPString() {
     length = 0;
-    data = new char[0];
+    data = new char[1];
 }
 //Constructor with char as param
 JPString::JPString(char input) {
